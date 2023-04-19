@@ -21,6 +21,8 @@ export default defineEventHandler(async event => {
         }
     }
 
+    const imageTitle = payload.title
+
     try {
         const response = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
@@ -30,9 +32,22 @@ export default defineEventHandler(async event => {
             ],
             n: 1,
         });
+
+        let imgUrl = undefined
+
+        if (imageTitle) {
+            const image = await openai.createImage({
+                prompt: `image of ${imageTitle}.`,
+                size: "512x512",
+                n: 1,
+                response_format: "url"
+            })
+
+            imgUrl = image.data.data[0].url
+        }
   
         const result = response.data.choices[0].message;
-        return { message: result?.content }
+        return { message: result?.content, image: imgUrl }
       } catch (error) {
           console.error('Error during ChatCompletion:', error);
             throw createError({

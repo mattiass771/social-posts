@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 const title = ref('');
 const description = ref('');
-const image = "https://thumbs.dreamstime.com/b/pizza-rustic-italian-mozzarella-cheese-basil-leaves-35669930.jpg";
+const image = ref(undefined);
 const message = ref('');
 const isLoading = ref(false);
 
@@ -18,10 +18,12 @@ const submitPost = async (): Promise<void> => {
     // Fetch the message from the API
     const { data } = await useFetch('/api/chat-completion', {
       method: 'POST',
-      body: { description: description.value },
+      body: { description: description.value, title: title.value },
     });
     // @ts-ignore
     message.value = data.value.message;
+    // @ts-ignore
+    image.value = data.value.image
   } finally {
     // Set isLoading back to false after the response is received
     isLoading.value = false;
@@ -76,7 +78,7 @@ const submitPost = async (): Promise<void> => {
             </div>
             <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full md:w-2/3 lg:w-1/2 mx-auto" v-if="message">
             <div class="space-y-4">
-                <div class="text-center">
+                <div v-if="image" class="text-center">
                     <img class="w-full h-64 object-cover rounded-md mb-4" :src="image" alt="Social media card preview image">
                 </div>
                 <div>
